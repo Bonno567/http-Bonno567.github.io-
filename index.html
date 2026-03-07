@@ -1,82 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Chúc mừng 8/3</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc mừng Ngày Quốc tế Phụ nữ 8/3</title>
+    <style>
+        body {
+            background: linear-gradient(#ffd6e7, #ffeef5);
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 50px;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-<style>
-body{
-background: linear-gradient(#ffd6e7,#ffeef5);
-text-align:center;
-font-family:sans-serif;
-padding-top:50px;
-}
+        h1 {
+            color: #ff4d88;
+            font-size: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
 
-h1{
-color:#ff4d88;
-font-size:40px;
-}
+        p {
+            font-size: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
 
-p{
-font-size:20px;
-}
+        .img-container {
+            margin-top: 20px;
+        }
 
-img{
-width:220px;
-border-radius:15px;
-margin-top:20px;
-}
+        img {
+            width: 250px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(255, 77, 136, 0.3);
+            border: 5px solid white;
+        }
 
-button{
-margin-top:30px;
-padding:12px 25px;
-font-size:18px;
-background:#ff4d88;
-color:white;
-border:none;
-border-radius:10px;
-cursor:pointer;
-}
+        button {
+            margin-top: 30px;
+            padding: 15px 35px;
+            font-size: 20px;
+            background: #ff4d88;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 77, 136, 0.4);
+        }
 
-.heart{
-position:fixed;
-bottom:-10px;
-font-size:20px;
-animation: float 5s linear infinite;
-}
+        button:hover {
+            background: #ff1a66;
+            transform: scale(1.1);
+        }
 
-@keyframes float{
-0%{transform:translateY(0)}
-100%{transform:translateY(-100vh)}
-}
-</style>
+        .heart {
+            position: fixed;
+            bottom: -20px;
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            animation: float 5s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-<h1>Chúc mừng 8/3 🌸</h1>
+    <h1>Chúc mừng 8/3 🌸</h1>
 
-<img src="https://i.imgur.com/9XnKQ9H.jpg">
+    <div class="img-container">
+        <!--  -->
+        <img src="https://i.imgur.com/9XnKQ9H.jpg" alt="Chúc mừng 8/3">
+    </div>
 
-<p>Chúc bạn có một ngày thật vui vẻ</p>
-<p>và luôn cười nhiều như bây giờ ✨</p>
+    <p>Chúc bạn một ngày 8/3 thật rạng rỡ, <br>
+    luôn hạnh phúc và yêu đời như lúc này ✨</p>
 
-<button onclick="alert('Chúc bạn 8/3 vui vẻ nha! 🌸')">
-Bấm vào đây 🎁
-</button>
+    <button onclick="showMessage()">
+        Bấm vào đây 🎁
+    </button>
 
-<script>
-setInterval(()=>{
-let heart=document.createElement("div");
-heart.className="heart";
-heart.innerHTML="❤️";
-heart.style.left=Math.random()*100+"vw";
-heart.style.fontSize=(15+Math.random()*20)+"px";
-document.body.appendChild(heart);
+    <script>
+        function showMessage() {
+            // Lời chúc mới ý nghĩa hơn
+            const loiChuc = "Chúc người phụ nữ tuyệt vời nhất đang xem màn hình này một ngày 8/3 tràn đầy niềm vui, luôn xinh đẹp và thành công trong mọi dự định. Cảm ơn bạn vì đã luôn tỏa sáng! 🌸💖✨";
+            alert(loiChuc);
+        }
 
-setTimeout(()=>{heart.remove()},5000);
-},500);
-</script>
+        // Hiệu ứng trái tim bay
+        setInterval(() => {
+            const heart = document.createElement("div");
+            heart.className = "heart";
+            const icons = ["❤️", "💖", "🌸", "✨", "💕"];
+            heart.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+            
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.fontSize = (15 + Math.random() * 25) + "px";
+            // Random thời gian bay để tự nhiên hơn
+            const duration = 4 + Math.random() * 4;
+            heart.style.animationDuration = duration + "s";
+            
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }, 400);
+    </script>
 
 </body>
 </html>
+
