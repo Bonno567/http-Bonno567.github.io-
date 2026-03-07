@@ -1,126 +1,254 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chúc mừng Ngày Quốc tế Phụ nữ 8/3</title>
-    <style>
-        body {
-            background: linear-gradient(#ffd6e7, #ffeef5);
-            text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 50px;
-            margin: 0;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lời Nhắn Ngọt Ngào 8/3</title>
 
-        h1 {
-            color: #ff4d88;
-            font-size: 40px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
+<style>
+:root{
+--bg-color:#fce4ec;
+--envelope-color:#f48fb1;
+--envelope-flap:#f06292;
+--paper-color:#ffffff;
+--text-color:#444;
+--heart-color:#d81b60;
+}
 
-        p {
-            font-size: 20px;
-            color: #555;
-            line-height: 1.6;
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-        .img-container {
-            margin-top: 20px;
-        }
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background-color:var(--bg-color);
+font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+overflow:hidden;
+}
 
-        img {
-            width: 250px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(255, 77, 136, 0.3);
-            border: 5px solid white;
-        }
+.wrapper{
+position:relative;
+width:300px;
+height:200px;
+display:flex;
+justify-content:center;
+align-items:center;
+}
 
-        button {
-            margin-top: 30px;
-            padding: 15px 35px;
-            font-size: 20px;
-            background: #ff4d88;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-            box-shadow: 0 5px 15px rgba(255, 77, 136, 0.4);
-        }
+.container{
+position:relative;
+cursor:pointer;
+width:100%;
+height:100%;
+perspective:1000px;
+}
 
-        button:hover {
-            background: #ff1a66;
-            transform: scale(1.1);
-        }
+.envelope-wrapper{
+position:relative;
+width:100%;
+height:100%;
+background-color:var(--envelope-color);
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+z-index:10;
+}
 
-        .heart {
-            position: fixed;
-            bottom: -20px;
-            font-size: 20px;
-            user-select: none;
-            pointer-events: none;
-            animation: float 5s linear infinite;
-        }
+.flap{
+position:absolute;
+top:0;
+left:0;
+width:0;
+height:0;
+border-left:150px solid transparent;
+border-right:150px solid transparent;
+border-top:110px solid var(--envelope-flap);
+transform-origin:top;
+transition:transform 0.6s ease-in-out;
+z-index:40;
+}
 
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-110vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-    </style>
+.front{
+position:absolute;
+bottom:0;
+left:0;
+width:0;
+height:0;
+border-left:150px solid var(--envelope-color);
+border-right:150px solid var(--envelope-color);
+border-bottom:110px solid #f06292;
+z-index:30;
+}
+
+.heart{
+position:absolute;
+top:-15px;
+left:50%;
+transform:translateX(-50%);
+width:25px;
+height:25px;
+background-color:var(--heart-color);
+z-index:45;
+clip-path:path('M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z');
+transition:transform 0.6s,opacity 0.4s;
+}
+
+/* Lá thư */
+.letter{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,200px);
+width:280px;
+height:180px;
+background-color:var(--paper-color);
+padding:15px;
+z-index:20;
+transition:transform 0.8s ease,height 0.8s ease;
+box-shadow:0 0 15px rgba(0,0,0,0.1);
+overflow:hidden;
+display:flex;
+flex-direction:column;
+align-items:center;
+border-radius:5px;
+}
+
+.letter-content{
+width:100%;
+opacity:0;
+transition:opacity 0.5s ease 0.4s;
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+}
+
+.letter h2{
+font-size:16px;
+color:#d81b60;
+margin-top:5px;
+margin-bottom:8px;
+font-weight:bold;
+}
+
+.letter p{
+font-size:11px;
+line-height:1.4;
+color:var(--text-color);
+margin-bottom:10px;
+}
+
+.photo-frame{
+background:white;
+padding:5px 5px 20px 5px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+transform:rotate(-1.5deg);
+width:150px;
+}
+
+.photo-frame img{
+width:100%;
+height:180px;
+object-fit:cover;
+display:block;
+}
+
+.signature{
+align-self:flex-end;
+font-size:11px;
+font-weight:bold;
+font-style:italic;
+color:#d81b60;
+margin-top:8px;
+}
+
+.container.open .flap{
+transform:rotateX(180deg);
+z-index:5;
+}
+
+.container.open .letter{
+transform:translate(-50%,-50%);
+height:420px;
+z-index:35;
+}
+
+.container.open .letter-content{
+opacity:1;
+}
+
+.container.open .heart{
+transform:translateX(-50%) translateY(-190px) scale(1.1);
+opacity:0.5;
+}
+
+.hint{
+position:absolute;
+bottom:-50px;
+width:100%;
+text-align:center;
+color:#ad1457;
+font-weight:bold;
+font-size:16px;
+animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+0%,20%,50%,80%,100%{transform:translateY(0);}
+40%{transform:translateY(-10px);}
+60%{transform:translateY(-5px);}
+}
+</style>
 </head>
+
 <body>
 
-    <h1>Chúc mừng 8/3 🌸</h1>
+<div class="wrapper">
+<div class="container" id="mainContainer">
 
-    <div class="img-container">
-        <!--  -->
-        <img src="https://imgur.com/gallery/international-womens-day-2018-IXyQg#FotFAx1" alt="Chúc mừng 8/3">
-    </div>
+<div class="envelope-wrapper">
+<div class="flap"></div>
+<div class="front"></div>
+<div class="heart"></div>
 
-    <p>Chúc bạn một ngày 8/3 thật rạng rỡ, <br>
-    luôn hạnh phúc và yêu đời như lúc này ✨</p>
+<div class="letter">
+<div class="letter-content">
 
-    <button onclick="showMessage()">
-        Bấm vào đây 🎁
-    </button>
+<h2>Gửi Bé Yêu ❤️</h2>
 
-    <script>
-        function showMessage() {
-            // Lời chúc mới ý nghĩa hơn
-            const loiChuc = "Chúc người phụ nữ tuyệt vời nhất đang xem màn hình này một ngày 8/3 tràn đầy niềm vui, luôn xinh đẹp và thành công trong mọi dự định. Cảm ơn bạn vì đã luôn tỏa sáng! 🌸💖✨";
-            alert(loiChuc);
-        }
+<p>
+Chúc mừng ngày 8/3!  
+Chúc em luôn xinh đẹp, rạng rỡ và hạnh phúc bên anh nhé.  
+Yêu em rất nhiều ✨!
+</p>
 
-        // Hiệu ứng trái tim bay
-        setInterval(() => {
-            const heart = document.createElement("div");
-            heart.className = "heart";
-            const icons = ["❤️", "💖", "🌸", "✨", "💕"];
-            heart.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            
-            heart.style.left = Math.random() * 100 + "vw";
-            heart.style.fontSize = (15 + Math.random() * 25) + "px";
-            // Random thời gian bay để tự nhiên hơn
-            const duration = 4 + Math.random() * 4;
-            heart.style.animationDuration = duration + "s";
-            
-            document.body.appendChild(heart);
+<div class="photo-frame">
+<img src="https://i.pinimg.com/736x/87/42/f0/8742f0688349540b61405e60802f06a9.jpg">
+</div>
 
-            setTimeout(() => {
-                heart.remove();
-            }, duration * 1000);
-        }, 400);
-    </script>
+<div class="signature">Anh yêu em!</div>
+
+</div>
+</div>
+</div>
+
+<div class="hint" id="hint">Mở thư ở đây nè!</div>
+
+</div>
+</div>
+
+<script>
+const container=document.getElementById("mainContainer");
+const hint=document.getElementById("hint");
+
+container.addEventListener("click",()=>{
+container.classList.toggle("open");
+hint.style.opacity=container.classList.contains("open")?"0":"1";
+});
+</script>
 
 </body>
 </html>
-
