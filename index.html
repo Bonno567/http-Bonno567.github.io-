@@ -1,0 +1,330 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bạn Muốn Mua Gì? - AI Shopping Assistant</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom styles for animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .loading-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 font-sans pb-20">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 text-blue-600">
+                <div class="bg-blue-100 p-2 rounded-xl">
+                    <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">Bạn Muốn Mua Gì?</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">
+                Nói nhu cầu của bạn, <br class="hidden md:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                    AI sẽ lo phần tìm kiếm!
+                </span>
+            </h2>
+        </div>
+
+        <!-- Input Form -->
+        <div class="bg-white p-3 rounded-3xl shadow-xl shadow-blue-900/5 border border-slate-100 mb-12 max-w-3xl mx-auto relative z-10 hover:shadow-2xl transition-shadow">
+            <form id="searchForm" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i data-lucide="sparkles" class="h-6 w-6 text-indigo-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="VD: Quà cho dân văn phòng hay đau lưng dưới 1 triệu..."
+                        class="w-full pl-14 pr-4 py-5 bg-transparent outline-none text-slate-700 text-lg rounded-2xl focus:ring-4 focus:ring-blue-50 transition-all placeholder-slate-400"
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-10 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md min-w-[160px]"
+                >
+                    <span id="btnIcon"><i data-lucide="search" class="w-5 h-5"></i></span>
+                    <span id="btnText">Gợi ý</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl flex items-start gap-3 mb-8 max-w-3xl mx-auto shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+            <p id="errorText"></p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden fade-in space-y-8">
+            <div class="flex items-center gap-3 justify-center mb-8">
+                <div class="h-px bg-slate-200 flex-grow max-w-[100px]"></div>
+                <h3 class="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                    <i data-lucide="shopping-cart" class="w-7 h-7 text-indigo-500"></i>
+                    Gợi ý hàng đầu cho bạn
+                </h3>
+                <div class="h-px bg-slate-200 flex-grow max-w-[100px]"></div>
+            </div>
+            
+            <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Các thẻ sản phẩm sẽ được thêm bằng JavaScript tại đây -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Khởi tạo icons lần đầu
+        lucide.createIcons();
+
+        // Hệ thống sẽ tự động cung cấp API key trong môi trường này
+        const apiKey = "";
+
+        // DOM Elements
+        const form = document.getElementById('searchForm');
+        const input = document.getElementById('searchInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        // Hàm gọi API với cơ chế tự động thử lại (Exponential Backoff)
+        const fetchWithRetry = async (url, options, retries = 5) => {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        };
+
+        const getShopeeLink = (keyword) => `https://shopee.vn/search?keyword=${encodeURIComponent(keyword)}`;
+        const getLazadaLink = (keyword) => `https://www.lazada.vn/catalog/?q=${encodeURIComponent(keyword)}`;
+
+        // Hàm tạo link tải/hiển thị ảnh bằng AI
+        const generateProductImage = async (prompt, imgElementId, placeholderId) => {
+            const imgEl = document.getElementById(imgElementId);
+            const placeholderEl = document.getElementById(placeholderId);
+
+            try {
+                const payload = {
+                    instances: { prompt: `Professional e-commerce product photography of ${prompt}, studio lighting, clean white background, high resolution` },
+                    parameters: { sampleCount: 1 }
+                };
+
+                const response = await fetchWithRetry(
+                    `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+                const data = await response.json();
+                
+                if (data.predictions?.[0]?.bytesBase64Encoded) {
+                    const imageUrl = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    imgEl.src = imageUrl;
+                    imgEl.classList.remove('hidden');
+                    placeholderEl.classList.add('hidden');
+                } else {
+                    throw new Error('Không nhận được dữ liệu ảnh');
+                }
+            } catch (err) {
+                console.error("Lỗi tạo ảnh:", err);
+                placeholderEl.innerHTML = `
+                    <i data-lucide="image" class="w-10 h-10 mb-2 opacity-30 text-gray-400"></i>
+                    <span class="text-sm text-gray-400">Lỗi tải ảnh</span>
+                `;
+                lucide.createIcons();
+            }
+        };
+
+        // Xử lý sự kiện Submit Form
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            // Cập nhật UI trạng thái Loading
+            input.disabled = true;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            btnIcon.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 loading-spin"></i>`;
+            btnText.textContent = "Đang tìm...";
+            errorMessage.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            resultsGrid.innerHTML = '';
+            lucide.createIcons();
+
+            try {
+                const systemInstruction = `
+                    Bạn là một chuyên gia tư vấn mua sắm trực tuyến thông minh tại Việt Nam.
+                    Nhiệm vụ: Người dùng cung cấp nhu cầu. Bạn hãy phân tích và đề xuất ĐÚNG 3 sản phẩm/dòng sản phẩm phù hợp nhất.
+                    Chú ý: Trả về kết quả CHỈ BẰNG JSON, không kèm văn bản nào khác.
+                `;
+
+                const payload = {
+                    contents: [{ parts: [{ text: query }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    productName: { type: "STRING", description: "Tên sản phẩm cụ thể" },
+                                    reason: { type: "STRING", description: "Lý do vì sao phù hợp (ngắn gọn)" },
+                                    estimatedPrice: { type: "STRING", description: "Khoảng giá tham khảo (VD: 500.000đ - 700.000đ)" },
+                                    searchKeyword: { type: "STRING", description: "Từ khóa chuẩn để tìm trên Shopee/Lazada" },
+                                    imagePrompt: { type: "STRING", description: "Một câu mô tả hình dáng sản phẩm BẰNG TIẾNG ANH thật chi tiết để đưa cho AI vẽ ảnh (VD: A sleek silver laptop with a glowing logo)" }
+                                },
+                                required: ["productName", "reason", "estimatedPrice", "searchKeyword", "imagePrompt"]
+                            }
+                        }
+                    }
+                };
+
+                const response = await fetchWithRetry(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+                const data = await response.json();
+                const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (textResult) {
+                    const results = JSON.parse(textResult);
+                    
+                    // Render HTML cho từng kết quả
+                    results.forEach((item, index) => {
+                        const imgElementId = `img-${index}`;
+                        const placeholderId = `placeholder-${index}`;
+                        
+                        const cardHTML = `
+                            <div class="bg-white rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+                                <!-- Image Container -->
+                                <div class="relative w-full pt-[80%] bg-slate-50 border-b border-slate-100 overflow-hidden">
+                                    
+                                    <!-- Placeholder Loading -->
+                                    <div id="${placeholderId}" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-100">
+                                        <i data-lucide="loader-2" class="w-8 h-8 text-blue-500 loading-spin mb-2"></i>
+                                        <span class="text-sm font-medium text-gray-500">AI đang vẽ ảnh...</span>
+                                    </div>
+                                    
+                                    <!-- Actual Image -->
+                                    <img id="${imgElementId}" alt="${item.productName}" class="absolute inset-0 w-full h-full object-cover object-center bg-white transition-opacity duration-500 hidden" />
+                                    
+                                    <!-- Price Tag -->
+                                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-indigo-700 font-bold px-3 py-1.5 rounded-full text-sm shadow-sm z-10">
+                                        ${item.estimatedPrice}
+                                    </div>
+                                </div>
+
+                                <!-- Content Container -->
+                                <div class="p-6 flex flex-col flex-grow">
+                                    <h4 class="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                        ${item.productName}
+                                    </h4>
+                                    <p class="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">
+                                        <span class="font-semibold text-slate-800 block mb-1">Tại sao chọn sản phẩm này?</span>
+                                        ${item.reason}
+                                    </p>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex flex-col gap-3 mt-auto">
+                                        <a href="${getShopeeLink(item.searchKeyword)}" target="_blank" rel="noopener noreferrer" class="w-full bg-[#EE4D2D] hover:bg-[#d74226] text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors shadow-sm">
+                                            Tìm trên Shopee
+                                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                                        </a>
+                                        <a href="${getLazadaLink(item.searchKeyword)}" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-100 hover:bg-slate-200 text-[#0F146D] py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors">
+                                            Tìm trên Lazada
+                                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        resultsGrid.insertAdjacentHTML('beforeend', cardHTML);
+                        
+                        // Kích hoạt việc vẽ ảnh cho sản phẩm này
+                        generateProductImage(item.imagePrompt, imgElementId, placeholderId);
+                    });
+
+                    // Cập nhật icon cho các thẻ vừa thêm
+                    lucide.createIcons();
+                    
+                    // Hiển thị kết quả
+                    resultsSection.classList.remove('hidden');
+
+                } else {
+                    throw new Error('Không thể phân tích dữ liệu trả về.');
+                }
+
+            } catch (err) {
+                console.error(err);
+                errorText.textContent = 'Hệ thống AI đang phản hồi chậm hoặc có lỗi, vui lòng thử lại sau giây lát.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Khôi phục trạng thái UI
+                input.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                btnIcon.innerHTML = `<i data-lucide="search" class="w-5 h-5"></i>`;
+                btnText.textContent = "Gợi ý";
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
+
+```
+  
