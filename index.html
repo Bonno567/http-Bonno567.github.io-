@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bạn Muốn Mua Gì? - AI Shopping Assistant</title>
+    <title>Công Cụ Tìm Kiếm Mua Sắm Nhanh</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,20 +13,12 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* Custom styles for animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        .loading-spin {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .animate-slide-down {
+            animation: slideDown 0.4s ease-out forwards;
         }
     </style>
 </head>
@@ -34,6 +26,171 @@
 
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3 text-blue-600">
+            <div class="bg-blue-100 p-2 rounded-xl">
+                <i data-lucide="search" class="w-6 h-6"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">Trợ Lý Tìm Kiếm Mua Sắm</h1>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                Tìm siêu tốc trên mọi nền tảng
+            </h2>
+            <p class="text-slate-600 text-lg">
+                Nhập tên sản phẩm, chúng tôi sẽ tự động lọc kết quả tốt nhất từ Google, Shopee và Lazada cho bạn.
+            </p>
+        </div>
+
+        <!-- Input Form -->
+        <div class="bg-white p-3 rounded-2xl shadow-lg border border-slate-200 mb-10">
+            <form id="searchForm" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="shopping-bag" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="VD: Điện thoại iPhone 15 Pro Max..."
+                        class="w-full pl-12 pr-4 py-4 bg-slate-50 outline-none text-slate-700 text-lg rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400 border border-transparent focus:border-blue-500"
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
+                >
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                    Tạo Link Tìm Kiếm
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section (Ban đầu ẩn) -->
+        <div id="resultsSection" class="hidden animate-slide-down space-y-6">
+            
+            <h3 class="text-xl font-bold text-slate-800 border-b pb-2">
+                Đã chuẩn bị xong liên kết tìm kiếm cho: <span id="displayQuery" class="text-blue-600"></span>
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Nhóm 1: Tìm qua Google (Lọc chính xác theo web) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-red-100 text-red-600 rounded-lg">
+                            <i data-lucide="globe" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">Bộ lọc Google</h4>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-5">
+                        Dùng sức mạnh của Google để quét toàn bộ dữ liệu trên các sàn. Thường tìm được kết quả chính xác hơn thanh tìm kiếm mặc định của web.
+                    </p>
+                    <div class="space-y-3">
+                        <a id="btnGoogleAll" href="#" target="_blank" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition-colors">
+                            <span>Tìm Google (Gộp Shopee & Lazada)</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                        <a id="btnGoogleShopee" href="#" target="_blank" class="w-full bg-orange-50 hover:bg-orange-100 text-[#EE4D2D] border border-orange-200 py-3 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition-colors">
+                            <span>Google quét riêng Shopee</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                        <a id="btnGoogleLazada" href="#" target="_blank" class="w-full bg-blue-50 hover:bg-blue-100 text-[#0F146D] border border-blue-200 py-3 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition-colors">
+                            <span>Google quét riêng Lazada</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Nhóm 2: Tìm trực tiếp trong App/Web của Sàn -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                            <i data-lucide="smartphone" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">Tìm trong Sàn (Direct)</h4>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-5">
+                        Mở trực tiếp ứng dụng hoặc trang web của Shopee/Lazada để hiển thị ngay danh sách sản phẩm.
+                    </p>
+                    <div class="space-y-3">
+                        <a id="btnDirectShopee" href="#" target="_blank" class="w-full bg-[#EE4D2D] hover:bg-[#d74226] text-white py-3 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition-colors">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                                Mở Shopee
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </a>
+                        <a id="btnDirectLazada" href="#" target="_blank" class="w-full bg-[#0F146D] hover:bg-[#0a0d4d] text-white py-3 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition-colors">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                                Mở Lazada
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Khởi tạo icon
+        lucide.createIcons();
+
+        const form = document.getElementById('searchForm');
+        const input = document.getElementById('searchInput');
+        const resultsSection = document.getElementById('resultsSection');
+        const displayQuery = document.getElementById('displayQuery');
+
+        // Khai báo các nút bấm
+        const btnGoogleAll = document.getElementById('btnGoogleAll');
+        const btnGoogleShopee = document.getElementById('btnGoogleShopee');
+        const btnGoogleLazada = document.getElementById('btnGoogleLazada');
+        const btnDirectShopee = document.getElementById('btnDirectShopee');
+        const btnDirectLazada = document.getElementById('btnDirectLazada');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            // Hiển thị từ khóa lên giao diện
+            displayQuery.textContent = `"${query}"`;
+
+            const encodedQuery = encodeURIComponent(query);
+
+            // 1. Cấu trúc link tìm kiếm Google với toán tử "site:"
+            // - Tìm trên cả 2 trang
+            btnGoogleAll.href = `https://www.google.com/search?q=site:shopee.vn+OR+site:lazada.vn+${encodedQuery}`;
+            // - Tìm riêng trên Shopee bằng Google
+            btnGoogleShopee.href = `https://www.google.com/search?q=site:shopee.vn+${encodedQuery}`;
+            // - Tìm riêng trên Lazada bằng Google
+            btnGoogleLazada.href = `https://www.google.com/search?q=site:lazada.vn+${encodedQuery}`;
+
+            // 2. Cấu trúc link tìm kiếm nội bộ của từng sàn
+            btnDirectShopee.href = `https://shopee.vn/search?keyword=${encodedQuery}`;
+            btnDirectLazada.href = `https://www.lazada.vn/catalog/?q=${encodedQuery}`;
+
+            // Hiển thị khu vực kết quả (ẩn và hiện lại để kích hoạt animation)
+            resultsSection.classList.remove('hidden');
+            
+            // Xóa class animation cũ và ép trình duyệt vẽ lại (reflow) rồi thêm lại
+            resultsSection.classList.remove('animate-slide-down');
+            void resultsSection.offsetWidth; 
+            resultsSection.classList.add('animate-slide-down');
+        });
+    </script>
+</body>
+</html>
+
+
+```
         <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3 text-blue-600">
                 <div class="bg-blue-100 p-2 rounded-xl">
